@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic Mandala Alignment</title>
+    <style>
+        :root {
+            --bg-color: #0b0c10;
+            --panel-bg: #1f2833;
+            --text-main: #c5c6c7;
+            --accent: #66fcf1;
+            --accent-dim: #45a29e;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .sidebar {
+            width: 350px;
+            background-color: var(--panel-bg);
+            padding: 2rem;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            overflow-y: auto;
+            z-index: 10;
+        }
+        h1 {
+            color: var(--accent);
+            font-size: 1.5rem;
+            margin-top: 0;
+            text-align: center;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        label {
+            font-size: 0.9rem;
+            color: var(--accent-dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        input, select {
+            padding: 0.8rem;
+            background-color: var(--bg-color);
+            border: 1px solid var(--accent-dim);
+            color: var(--text-main);
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        button {
+            padding: 1rem;
+            background-color: var(--accent);
+            color: var(--bg-color);
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 1rem;
+        }
+        button:hover {
+            background-color: var(--accent-dim);
+        }
+        .main-stage {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        .mandala-container {
+            position: relative;
+            width: 80vh;
+            height: 80vh;
+            max-width: 800px;
+            max-height: 800px;
+        }
+        .pointer {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 30px solid var(--accent);
+            z-index: 5;
+            filter: drop-shadow(0 0 8px var(--accent));
+        }
+        .mandala-image {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: contain;
+            transition: transform 3s cubic-bezier(0.25, 0.1, 0.25, 1);
+            transform-origin: center center;
+            box-shadow: 0 0 40px rgba(102, 252, 241, 0.1);
+        }
+        #results-panel {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: rgba(0,0,0,0.3);
+            border-left: 3px solid var(--accent);
+            font-size: 0.9rem;
+            line-height: 1.5;
+            display: none;
+            animation: fadeIn 1s forwards;
+        }
+        .result-section { margin-bottom: 1rem; }
+        .result-title { color: var(--accent); font-weight: bold; margin-bottom: 0.3rem; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <h1>Cosmic Alignment</h1>
+        
+        <div class="form-group">
+            <label for="dob">Date of Birth (Outer Time Layer)</label>
+            <input type="date" id="dob" required>
+        </div>
+
+        <div class="form-group">
+            <label for="country">Region (Population Ring)</label>
+            <select id="country">
+                <option value="India">India (1.5B)</option>
+                <option value="China">China (1.5B)</option>
+                <option value="Africa">Africa (1B)</option>
+                <option value="Middle East">Middle East (650M)</option>
+                <option value="East/South Asia">East & South Asia (300M)</option>
+                <option value="USA/Canada">USA/Canada (480M)</option>
+                <option value="Europe">Europe/UK/Italy (120M+)</option>
+                <option value="South America">Argentina & South America</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="generation">Family Role (Inner Generation Layer)</label>
+            <select id="generation">
+                <option value="Gen1">Gen1: Grandparent (Foundation)</option>
+                <option value="Gen2">Gen2: Parent (Stewardship)</option>
+                <option value="Gen3">Gen3: Child (Growth)</option>
+                <option value="Gen4">Gen4: Grandchild (Future)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="core">Core (Religion & Politics)</label>
+            <input type="text" id="core" placeholder="e.g., Buddhism, Secular, Crossroads" required>
+        </div>
+
+        <button onclick="calculateAlignment()">Reveal Life Blueprint</button>
+
+        <div id="results-panel"></div>
+    </div>
+
+    <div class="main-stage">
+        <div class="mandala-container">
+            <div class="pointer"></div>
+            <!-- Ensure image.png is in the same directory as this HTML file -->
+            <img src="image.png" alt="Layered Mandala" class="mandala-image" id="mandala">
+        </div>
+    </div>
+
+    <script>
+        let currentRotation = 0;
+
+        function calculateAlignment() {
+            const dob = document.getElementById('dob').value;
+            const country = document.getElementById('country').value;
+            const generation = document.getElementById('generation').value;
+            const core = document.getElementById('core').value;
+
+            if (!dob || !core) {
+                alert("Please complete the Date of Birth and Core inputs.");
+                return;
+            }
+
+            // Calculate Rotation Angle based on inputs to create a pseudo-random but deterministic spin
+            const dateObj = new Date(dob);
+            const month = dateObj.getMonth(); // 0-11
+            const day = dateObj.getDate();
+            
+            // Base rotation on the day of the year to align the outer 365-day calendar layer
+            const dayOfYear = (month * 30.4) + day;
+            const targetRotation = (dayOfYear / 365) * 360;
+            
+            // Add extra spins for visual effect
+            currentRotation += 1080 + targetRotation - (currentRotation % 360); 
+            
+            const mandala = document.getElementById('mandala');
+            mandala.style.transform = `rotate(${currentRotation}deg)`;
+
+            generateReading(month, country, generation, core);
+        }
+
+        function generateReading(month, country, generation, core) {
+            const resultsPanel = document.getElementById('results-panel');
+            resultsPanel.style.display = 'none'; // reset animation
+            
+            // Map Month to Season/Element (Layer 2 & 3)
+            let season, element, energy;
+            if (month >= 2 && month <= 4) { season = "Spring (Fruits)"; element = "Breath & Atmosphere"; energy = "Positive (+)"; }
+            else if (month >= 5 && month <= 7) { season = "Summer (Cotton)"; element = "Heat & Fire"; energy = "Negative (Entropy)"; }
+            else if (month >= 8 && month <= 10) { season = "Autumn (Pulses)"; element = "Earth & Grounding"; energy = "Negative (Entropy)"; }
+            else { season = "Winter (Wheat & Greens)"; element = "Water & Flow"; energy = "Positive (+)"; }
+
+            // Map Generation (Layer 1)
+            const genMap = {
+                "Gen1": "Your core motivation relies on establishing foundational stability and passing down wisdom.",
+                "Gen2": "Your bias is geared toward stewardship, managing resources, and protecting the inner core.",
+                "Gen3": "You are driven by rapid growth, absorbing the seasonal changes to branch out.",
+                "Gen4": "Your orientation is futuristic, looking outward toward the elemental and cosmic layers."
+            };
+
+            setTimeout(() => {
+                resultsPanel.innerHTML = `
+                    <div class="result-section">
+                        <div class="result-title">Core & Generational Anchor (Layers 1 & 0)</div>
+                        Rooted in <strong>${core}</strong>, operating at the crossroads of your lineage. ${genMap[generation]}
+                    </div>
+                    <div class="result-section">
+                        <div class="result-title">Seasonal & Elemental Drive (Layers 2 & 3)</div>
+                        Aligned with <strong>${season}</strong> and <strong>${element}</strong>. You operate best under conditions of <strong>${energy}</strong> energy balance, influencing your day-to-day emotional reactions.
+                    </div>
+                    <div class="result-section">
+                        <div class="result-title">Macro Bias (Layers 7 & 8)</div>
+                        Positioned within the <strong>${country}</strong> population ring. Your worldview is heavily influenced by the collective gravity and space constraints of your hemisphere (East/West division).
+                    </div>
+                `;
+                resultsPanel.style.display = 'block';
+            }, 1000); // Wait for initial rotation to start
+        }
+    </script>
+</body>
+</html>
